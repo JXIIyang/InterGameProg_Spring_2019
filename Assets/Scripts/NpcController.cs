@@ -69,8 +69,6 @@ public class NpcController : MonoBehaviour
 
     public ParticleSystem DashPar;
 
-    private Vector3 _fallPos;
-
     
     
     
@@ -104,6 +102,7 @@ public class NpcController : MonoBehaviour
         AddState(new HurtState());
         AddState(new AttackState());
         AddState(new HiState());
+        AddState(new WaitState());
         AddState(new LeaveState());
         State.State = NPCState.Walk;
         _renderer.flipX = true;
@@ -123,7 +122,7 @@ public class NpcController : MonoBehaviour
         {
             Destroy(gameObject);
         }
-        if ((State.State == NPCState.Wait || State.State == NPCState.Hi) && PlayerReply)
+        /*if ((State.State == NPCState.Wait || State.State == NPCState.Hi) && PlayerReply)
         {
             var chance = Random.value;
             
@@ -152,8 +151,9 @@ public class NpcController : MonoBehaviour
             }
             
 
-            _leave = true;
-        }
+            SetState(NPCState.Leave);
+            /*_leave = true;#1#
+        }*/
         
 
         if (_leave)
@@ -169,7 +169,12 @@ public class NpcController : MonoBehaviour
         {
             _renderer.flipX = false;
             _movement = 1;
-            _leave = true;
+            State.State = NPCState.Leave; 
+        }
+        if (State.State != NPCState.Leave && _player.transform.position.x < transform.position.x)
+        {
+            _renderer.flipX = true;
+            _movement = -1; 
         }
         
         
@@ -201,7 +206,7 @@ public class NpcController : MonoBehaviour
     // Update is called once per frame
     void FixedUpdate()
     {
-        if (State.State == NPCState.Leave)
+        /*if (State.State == NPCState.Leave)
         {
             Physics2D.IgnoreCollision(_player.GetComponent<Collider2D>(), GetComponent<Collider2D>());
             _renderer.flipX = true;
@@ -211,17 +216,17 @@ public class NpcController : MonoBehaviour
                 new Vector2(Mathf.Lerp(Mathf.Abs(rb.velocity.x), WalkSpeed * 2, Time.deltaTime * 4f) * _movement,
                     rb.velocity.y);
             return;
-        }
+        }*/
 
-        if (State.State == NPCState.Walk)
+        /*if (State.State == NPCState.Walk)
         {
             _animator.SetBool("Walk", true);
             rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(rb.velocity.x), WalkSpeed, Time.deltaTime * 4f) *_movement, rb.velocity.y);
-        }
+        }*/
         
             
             
-        if (State.State == NPCState.Attack)
+/*        if (State.State == NPCState.Attack)
         {
             _animator.SetBool("Walk", false);
             _animator.SetBool("Dash", true);
@@ -241,7 +246,6 @@ public class NpcController : MonoBehaviour
                 {
                     SetState(NPCState.Leave);
                     timer = 0.0f;
-                    _animator.SetBool("Dash", false);
                     DashPar.Stop();
                     rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(rb.velocity.x), WalkSpeed * 2, Time.deltaTime * 4f) * -1,
                         rb.velocity.y);
@@ -249,22 +253,16 @@ public class NpcController : MonoBehaviour
 
         }
             
-
- 
-        if (_attacked)
-        {
-            Fall();
-        }
         
     }
 
 
-    void LateUpdate()
+/*    void LateUpdate()
     {
         if (!_attacked || (Mathf.Abs(rb.velocity.x) > 0.0f)) return;
         _attacked = false;
         _animator.SetBool("Fall", false);
-    }
+    }*/
 
 
 
@@ -281,16 +279,13 @@ public class NpcController : MonoBehaviour
             }
             
             else if ( !_stateChange && PlayerController.Singleton.State.State == PlayerController.PlayerState.Dash){
-                _attacked = true;
-                _animator.SetBool("Fall", true);
-                _fallPos = transform.position;
+                SetState(NPCState.Hurt);
                 _stateChange = true;
             }
 
             else if ( !_stateChange && State.State != NPCState.Angry && PlayerController.Singleton.State.State != PlayerController.PlayerState.Dash)
             {
                 SetState(NPCState.Angry);
-                _animator.SetBool("Angry", true);
                 _stateChange = true;
             }
             
@@ -307,21 +302,6 @@ public class NpcController : MonoBehaviour
     void OnCollisionExit2D(Collision2D collision)
     {
         _stateChange = !_stateChange;
-    }
-
-
-    
-    
-
-    void Fall()
-    {
-        if (Mathf.Abs(transform.position.x - _fallPos.x) >= 10)
-        {
-            rb.velocity = new Vector2(0.0f, rb.velocity.y);
-            _attacked = false;
-            _animator.SetBool("Fall", false);
-            SetState(NPCState.Attack);;
-        } 
     }
     
     
@@ -400,8 +380,6 @@ public class NpcController : MonoBehaviour
         {
             base.OnStart(c);
             FallPos = c.transform.position;
-            GameManager.Singleton.HeartNum --;
-            GameManager.Singleton.HeartNum --;
         }
         
         public override void Run(NpcController c)
@@ -409,7 +387,7 @@ public class NpcController : MonoBehaviour
             if (Mathf.Abs(c.transform.position.x - FallPos.x) >= 10)
                 //|| Mathf.Abs(c.rb.velocity.x) <= 0f
             {           
-                c.SetState(NPCState.Idle);     
+                c.SetState(NPCState.Attack);     
             }
             else
             {
@@ -434,7 +412,7 @@ public class NpcController : MonoBehaviour
 
         public override void Run(NpcController c)
         {
-            c.rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.WalkSpeed, Time.deltaTime * 4f) * c.Movement, c.rb.velocity.y);
+            c.rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.WalkSpeed, Time.deltaTime * 4f) * c._movement, c.rb.velocity.y);
         }
         
         
@@ -444,6 +422,60 @@ public class NpcController : MonoBehaviour
         }
         
     }
+    
+    public class WaitState : NState
+    {
+        public WaitState()
+        {
+            State = NPCState.Wait;
+            TriggerName = "";
+        }
+
+        public override void Run(NpcController c)
+        {
+            c.rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.WalkSpeed, Time.deltaTime * 4f) * c._movement, c.rb.velocity.y);
+        }
+        
+        
+        public override void OnEnd(NpcController c)
+        {
+            c.rb.velocity = new Vector2 (0, c.rb.velocity.y);
+        }
+        
+    }
+    
+    
+    public class LeaveState : NState
+    {
+        public LeaveState()
+        {
+            State = NPCState.Leave;
+            TriggerName = "";
+            
+        }
+
+        public override void Run(NpcController c)
+        {
+            Physics2D.IgnoreCollision(PlayerController.Singleton.GetComponent<Collider2D>(), c.GetComponent<Collider2D>());
+            c._renderer.flipX = true;
+            c.rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.WalkSpeed * 2, Time.deltaTime * 4f) * -1,
+                c.rb.velocity.y);
+        }
+    }
+    public class AngryState : NState
+    {
+        public AngryState()
+        {
+            State = NPCState.Angry;
+            TriggerName = "Angry";
+        }
+
+        public override void Run(NpcController c)
+        {
+            c.rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.WalkSpeed, Time.deltaTime * 4f) * c._movement, c.rb.velocity.y);
+        }
+    }
+    
     
     public class HiState : NState
     {
@@ -456,42 +488,77 @@ public class NpcController : MonoBehaviour
         public override void OnStart(NpcController c)
         {
             base.OnStart(c);
-                var chance = Random.value;                      
-                if (!_higherChance && chance > 0.8f && chance < 0.9f || _higherChance && chance > 0.7f && chance > 0.9f)
-                {
-                    GameManager.Singleton.AddHeart(1);                   
-                    c._audio.PlayOneShot(c.Hint);
-                    Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up, Quaternion.identity);
-                }
-                        
-                else if (!_higherChance && chance > 0.7f && chance < 0.8f || _higherChance && chance > 0.55f && chance > 0.7f)
-                {
-                    GameManager.Singleton.AddHeart(2);
-                    c._audio.PlayOneShot(c.Hint);
-                    Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up, Quaternion.identity);
-                    Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up * 1.5f, Quaternion.identity);
-                }
-                else if (chance > 0.9f)
-                {
-                    GameManager.Singleton.HeartNum --;
-                    c._audio.PlayOneShot(c.Bad);
-                    Instantiate(GameManager.Singleton.BadHeartPrefab, c.transform.position + Vector3.up, Quaternion.identity);
-                }
-                {
-                    c.SetState(NPCState.Wait);
-                }
+            var chance = Random.value;
+            if (chance < 0.1f)
+            {
+                GameManager.Singleton.AddHeart(2);
+                c._audio.PlayOneShot(c.Hint);
+                Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up,
+                    Quaternion.identity);
+                Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up * 1.5f,
+                    Quaternion.identity);
+            }
+
+            if (chance > 0.1f && chance < 0.2f)
+            {
+                GameManager.Singleton.HeartNum--;
+                c._audio.PlayOneShot(c.Bad);
+                Instantiate(GameManager.Singleton.BadHeartPrefab, c.transform.position + Vector3.up,
+                    Quaternion.identity);
+            }
+
+            if (chance > 0.7f)
+            {
+                GameManager.Singleton.AddHeart(1);
+                c._audio.PlayOneShot(c.Hint);
+                Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up,
+                    Quaternion.identity);
+            }
+
+            c.SetState(NPCState.Wait);
+            
+            
+            
+ 
         }
 
 
         public override void Run(NpcController c)
         {
 
-         }
+           if (c.PlayerReply)
+            {
+                var chance = Random.value;
+                if (!c._higherChance && chance > 0.8f && chance < 0.9f ||
+                    c._higherChance && chance > 0.7f && chance > 0.9f)
+                {
+                    GameManager.Singleton.AddHeart(1);
+                    c._audio.PlayOneShot(c.Hint);
+                    Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up,
+                        Quaternion.identity);
+                }
 
-        public override void OnEnd(NpcController c)
-        {
+                else if (!c._higherChance && chance > 0.7f && chance < 0.8f ||
+                         c._higherChance && chance > 0.55f && chance > 0.7f)
+                {
+                    GameManager.Singleton.AddHeart(2);
+                    c._audio.PlayOneShot(c.Hint);
+                    Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up,
+                        Quaternion.identity);
+                    Instantiate(GameManager.Singleton.HeartPrefab, c.transform.position + Vector3.up * 1.5f,
+                        Quaternion.identity);
+                }
+                else if (chance > 0.9f)
+                {
+                    GameManager.Singleton.HeartNum--;
+                    c._audio.PlayOneShot(c.Bad);
+                    Instantiate(GameManager.Singleton.BadHeartPrefab, c.transform.position + Vector3.up,
+                        Quaternion.identity);
+                }
+            }
 
-        }
+            c.SetState(NPCState.Wait);
+        
     }
     
     
@@ -514,25 +581,26 @@ public class NpcController : MonoBehaviour
         
         public override void Run(NpcController c)
         {
+
             if (DashTimer > 0)
             {
                 DashTimer -= Time.deltaTime;
                 c.rb.gravityScale = 0.0f;
-                c.rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.DashSpeed, Time.deltaTime * 3f) * c.Movement, c.rb.velocity.y);
+                c.rb.velocity = new Vector2(Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.DashSpeed, Time.deltaTime * 3f) * c._movement, c.rb.velocity.y);
                 c.DashPar.Play();
             }
             else
             {
-                c.SetState(NPCState.Idle);
+                c.SetState(NPCState.Leave);
             }
         }
 
 
         public override void OnEnd(NpcController c)
         {
-            DashTimer = c.DashTime;  
+            DashTimer = PlayerController.Singleton.DashTime;  
             c.rb.velocity = new Vector2 (0, c.rb.velocity.y);
-            c.rb.gravityScale = c._gravity;
+            c.rb.gravityScale = PlayerController.Singleton._gravity;
         }       
     }
         

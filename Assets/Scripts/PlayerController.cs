@@ -53,7 +53,7 @@ public class PlayerController : MonoBehaviour
    
         
     // dash
-    private float _gravity;
+    public float _gravity;
 
     // audio
     public AudioClip Hint;
@@ -260,7 +260,7 @@ public class PlayerController : MonoBehaviour
             Destroy(collision.gameObject);
         }
         
-        if (State.State != PlayerState.Hurt && collision.gameObject.CompareTag("NPC") && collision.gameObject.GetComponent<NpcController>().State == NpcController.NPCState.Attack)
+        if (State.State != PlayerState.Hurt && collision.gameObject.CompareTag("NPC") && collision.gameObject.GetComponent<NpcController>().State.State == NpcController.NPCState.Attack)
         {
             SetState(PlayerState.Hurt);
             
