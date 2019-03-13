@@ -35,6 +35,8 @@ public class GameManager : MonoBehaviour
     
     
     public GameObject HeartUIPrefab;
+
+    public float NpcInterval = 1.5f;
     
     
     // Start is called before the first frame update
@@ -103,8 +105,14 @@ public class GameManager : MonoBehaviour
         }
         if (GameObject.FindWithTag("NPC") == null)
         {
-            Instantiate(NPCPrefab, Player.transform.position + Vector3.right * Random.Range(11, 20),
-                Quaternion.identity);
+            NpcInterval -= Time.deltaTime;
+            if(NpcInterval < 0f)
+            {
+                Instantiate(NPCPrefab, Player.transform.position + Vector3.right * Random.Range(11, 20),
+                    Quaternion.identity);
+                NpcInterval = 1.5f;
+            }
+
         }
         if (Input.GetKeyUp(KeyCode.R))
         {

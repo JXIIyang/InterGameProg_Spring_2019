@@ -58,7 +58,6 @@ public class PlayerController : MonoBehaviour
     // audio
     public AudioClip Hint;
     private bool _meetNPC;   
-    private GameObject _npc;
     private Vector3 _progression;
 
 
@@ -171,7 +170,7 @@ public class PlayerController : MonoBehaviour
                 GameManager.Singleton.HeartNum --;
                 _audio.PlayOneShot(Hint);
                 Instantiate(GameManager.Singleton.HeartPrefab, transform.position + Vector3.up, Quaternion.identity);
-                _npc.GetComponent<NpcController>().PlayerReply = true;
+                NpcController.Singleton.PlayerReply = true;
             }
         }
 
@@ -236,7 +235,6 @@ public class PlayerController : MonoBehaviour
         if (other.CompareTag("NPCTriger"))
         {
             _meetNPC = true;
-            _npc = other.transform.parent.gameObject;
         }
 
         if (other.CompareTag("Win"))
@@ -306,7 +304,6 @@ public class PlayerController : MonoBehaviour
                         c._animator.SetBool(parameter.name, false);
                     }
                 } 
-            Debug.Log(State);
         }
  
         public virtual void Run(PlayerController c)
@@ -436,6 +433,7 @@ public class PlayerController : MonoBehaviour
         {
             base.OnStart(c);
             DashTimer = c.DashTime;
+            Debug.Log("PlayerDash");
         }
         
         
