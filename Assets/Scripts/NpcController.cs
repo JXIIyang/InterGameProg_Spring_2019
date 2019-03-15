@@ -33,11 +33,6 @@ public class NpcController : MonoBehaviour
     public NState State;
     public Dictionary<NPCState,NState> States = new Dictionary<NPCState, NState>();
 
-//    [HideInInspector]
-//    public NPCState State;
-
-
-
     private bool _stateChange;    
     private int _movement;
     
@@ -45,7 +40,6 @@ public class NpcController : MonoBehaviour
     public float WalkSpeed;
     public float DashSpeed;
 
-//    public GameObject Target;
     
     
 
@@ -97,7 +91,7 @@ public class NpcController : MonoBehaviour
         AddState(new LeaveState());
         rb.velocity = Vector3.zero;
         SetState(NPCState.Walk);
-        WalkSpeed = PlayerController.Singleton.WalkSpeed;
+        WalkSpeed = PlayerController.Singleton.WalkSpeed/2;
         DashSpeed = PlayerController.Singleton.DashSpeed;
         
         _renderer.flipX = true;
@@ -328,6 +322,7 @@ public class NpcController : MonoBehaviour
             {
                 Physics2D.IgnoreCollision(PlayerController.Singleton.GetComponent<Collider2D>(),
                     c.GetComponent<Collider2D>());
+                c._animator.SetBool("Walk", true);
                 c._renderer.flipX = true;
                 c.rb.velocity = new Vector2(
                     Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.WalkSpeed * 1.5f, Time.deltaTime * 4f) * -1,
@@ -349,6 +344,7 @@ public class NpcController : MonoBehaviour
 
     public class HiState : NState
     {
+        public float waitTimer = Random.Range(4f, 5f);
         public HiState()
         {
             State = NPCState.Hi;
@@ -359,6 +355,7 @@ public class NpcController : MonoBehaviour
         {
             base.OnStart(c);
             var chance = Random.value;
+            
             if (chance < 0.2f)
             {
                 GameManager.Singleton.AddHeart(2);
@@ -392,13 +389,9 @@ public class NpcController : MonoBehaviour
 
         public override void Run(NpcController c)
         {
-
-            Debug.Log(c.PlayerReply);
             if (c.PlayerReply)
             {
-                Debug.Log("2");
                 var chance = Random.value;
-                Debug.Log(chance);
                 if (chance > 0.6f)
                 {
                     GameManager.Singleton.AddHeart(1);
@@ -425,7 +418,16 @@ public class NpcController : MonoBehaviour
                 }
 
                 c.SetState(NPCState.Leave);
-            }            
+            }
+            else
+            {
+                waitTimer -= Time.deltaTime;
+                if (waitTimer < 0)
+                {
+                    c.SetState(NPCState.Leave);
+                }
+            }
+            
 
         }
     }

@@ -124,19 +124,8 @@ public class GameManager : MonoBehaviour
     {
         if (num > 0 && !EndGame)
         {
-//            for (int i = 0; i < num; i++)
-//            {
-//                var heart = Instantiate(HeartUIPrefab, new Vector3(20 * (HeartNum), 0, 0), Quaternion.identity);
-//                heart.transform.SetParent(_canvas.transform, false);
-//                heart.gameObject.name = (i + HeartNum).ToString();
-//                HeartUI.Add(heart);
-//                Debug.Log("add");
-//            }
-            HeartNum += num;
-            
-        }
-
-       
+            HeartNum += num;          
+        }      
     }
     
     

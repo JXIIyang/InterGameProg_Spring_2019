@@ -119,6 +119,7 @@ public class PlayerController : MonoBehaviour
         }
 
         GameProgressionCheck();
+        Debug.Log("Progression: " + _progression);
     }
 
     public void Inputs()
@@ -171,6 +172,7 @@ public class PlayerController : MonoBehaviour
                 _audio.PlayOneShot(Hint);
                 Instantiate(GameManager.Singleton.HeartPrefab, transform.position + Vector3.up, Quaternion.identity);
                 NpcController.Singleton.PlayerReply = true;
+                _meetNPC = false;
             }
         }
 
@@ -188,6 +190,8 @@ public class PlayerController : MonoBehaviour
 
     void GameProgressionCheck()
     {
+        float tempAlpha1 = 0f;
+        float tempAlpha2 = 0f;
         if (transform.position.x >= _progression.x)
         {
             _progression = transform.position;
@@ -197,12 +201,12 @@ public class PlayerController : MonoBehaviour
         {
             if ( Mathf.Abs(transform.position.x - PlayerInverted.transform.position.x) > 20)
             {
-                _alpha = (Mathf.Abs(transform.position.x - PlayerInverted.transform.position.x) - 20) * 0.1f;
+                tempAlpha1 = (Mathf.Abs(transform.position.x - PlayerInverted.transform.position.x) - 20) * 0.1f;
                 GameManager.Singleton.Audio.volume = Mathf.Lerp(GameManager.Singleton.Audio.volume, 0, Time.deltaTime);
             }
-            else if (_progression.x - transform.position.x > 15)
+            if (_progression.x - transform.position.x > 15)
             {
-                _alpha = ((_progression.x - transform.position.x) - 15) * 0.1f;
+                tempAlpha2 = (_progression.x - transform.position.x - 15) * 0.1f;
                 GameManager.Singleton.Audio.volume = Mathf.Lerp(GameManager.Singleton.Audio.volume, 0, Time.deltaTime);
             }
             else
@@ -214,6 +218,8 @@ public class PlayerController : MonoBehaviour
             {
                 SceneManager.LoadScene("End");
             }
+
+            _alpha = Mathf.Max(tempAlpha1, tempAlpha2);
             GameManager.Singleton.Overlay.color = new Color(0, 0, 0, _alpha);
         }
         else 
