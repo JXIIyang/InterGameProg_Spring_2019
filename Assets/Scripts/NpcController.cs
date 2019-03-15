@@ -93,7 +93,7 @@ public class NpcController : MonoBehaviour
         AddState(new LeaveState());
         rb.velocity = Vector3.zero;
         SetState(NPCState.Walk);
-        WalkSpeed = PlayerController.Singleton.WalkSpeed/2;
+        WalkSpeed = 10f;
         DashSpeed = PlayerController.Singleton.DashSpeed;
         
         _renderer.flipX = true;
@@ -118,7 +118,7 @@ public class NpcController : MonoBehaviour
         {
             Destroy(gameObject);
         }      
-        if (State.State != NPCState.Leave && State.State != NPCState.Sad && PlayerController.Singleton.transform.position.x > transform.position.x)
+        if (State.State != NPCState.Leave && State.State != NPCState.Sad  && State.State != NPCState.Attack && PlayerController.Singleton.transform.position.x > transform.position.x)
         {
             _renderer.flipX = false;
             _movement = 1;
@@ -218,7 +218,7 @@ public class NpcController : MonoBehaviour
             TriggerName = t;
         }
 
-        public virtual void OnStart(NpcController c)
+        public virtual void OnStart(NpcController c, bool instant = false)
         {
             foreach(AnimatorControllerParameter parameter in c._animator.parameters) 
             {
@@ -238,9 +238,10 @@ public class NpcController : MonoBehaviour
  
         public virtual void OnEnd(NpcController c)
         { }
+        
     }
     
-    public void SetState(NPCState s)
+    public void SetState(NPCState s, bool instant = false)
     {
         if (State != null && State.State == s)
             return;
@@ -252,7 +253,8 @@ public class NpcController : MonoBehaviour
         if (State != null)
             State.OnEnd(this);
         State = States[s];
-        State.OnStart(this);
+        State.OnStart(this, instant);
+
     }
     
     
@@ -266,7 +268,7 @@ public class NpcController : MonoBehaviour
             TriggerName = "Fall";
         }
 
-        public override void OnStart(NpcController c)
+        public override void OnStart(NpcController c, bool instant = false)
         {
             base.OnStart(c);
             FallPos = c.transform.position;
@@ -323,6 +325,12 @@ public class NpcController : MonoBehaviour
             TriggerName = "";
             WaitTime = Random.Range(1.0f, 4.0f);
             
+        }
+
+        public override void OnStart(NpcController c, bool instant = false)
+        {
+            base.OnStart(c, instant);
+            if (instant) WaitTime = 0.0f;
         }
 
         public override void Run(NpcController c)
@@ -391,7 +399,7 @@ public class NpcController : MonoBehaviour
             TriggerName = "";
         }
 
-        public override void OnStart(NpcController c)
+        public override void OnStart(NpcController c, bool instant = false)
         {
             base.OnStart(c);
             var chance = Random.value;
@@ -483,7 +491,7 @@ public class NpcController : MonoBehaviour
             TriggerName = "Dash";         
         }
 
-        public override void OnStart(NpcController c)
+        public override void OnStart(NpcController c, bool instant = false)
         {
             base.OnStart(c);
             DashTimer = PlayerController.Singleton.DashTime * 2;
@@ -501,7 +509,7 @@ public class NpcController : MonoBehaviour
             }
             else
             {
-                c.SetState(NPCState.Leave);
+                c.SetState(NPCState.Leave, true);
             }
         }
 

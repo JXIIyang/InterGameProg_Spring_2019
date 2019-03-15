@@ -237,7 +237,7 @@ public class PlayerController : MonoBehaviour
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.CompareTag("NPCTriger"))
+        if (other.CompareTag("NPCTrigger"))
         {
             _meetNPC = true;
         }

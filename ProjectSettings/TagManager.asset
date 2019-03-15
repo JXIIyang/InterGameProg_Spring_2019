@@ -11,9 +11,9 @@ TagManager:
   - PlayerInverted
   - NPC
   - PlayerTrigger
-  - NPCTriger
   - HeartUI
   - Win
+  - NPCTrigger
   layers:
   - Default
   - TransparentFX
