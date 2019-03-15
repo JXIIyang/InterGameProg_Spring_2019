@@ -119,7 +119,6 @@ public class PlayerController : MonoBehaviour
         }
 
         GameProgressionCheck();
-        Debug.Log("Progression: " + _progression);
     }
 
     public void Inputs()

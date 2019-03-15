@@ -103,7 +103,6 @@ public class PlayerInverted : MonoBehaviour
             {
                 RJ = true;
                 GameManager.Singleton.HeartNum --;
-                Debug.Log("LoseA");
                 _audio.PlayOneShot(Bad);
             }
 
