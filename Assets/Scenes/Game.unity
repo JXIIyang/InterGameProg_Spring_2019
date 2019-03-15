@@ -1882,7 +1882,7 @@ PrefabInstance:
     - target: {fileID: 59314275825558331, guid: 3d9fd7d42bbf543b3aef277550700d16,
         type: 3}
       propertyPath: m_LocalPosition.x
-      value: 8.78
+      value: 3.15
       objectReference: {fileID: 0}
     - target: {fileID: 59314275825558331, guid: 3d9fd7d42bbf543b3aef277550700d16,
         type: 3}
@@ -4643,6 +4643,7 @@ MonoBehaviour:
   Audio: {fileID: 1874336993}
   HeartUIPrefab: {fileID: 2448077171503361871, guid: 31f49ee07c6684747b3a0d1e89f18f10,
     type: 3}
+  NpcInterval: 1.5
 --- !u!4 &1874336991
 Transform:
   m_ObjectHideFlags: 0

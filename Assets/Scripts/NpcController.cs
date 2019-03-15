@@ -27,7 +27,8 @@ public class NpcController : MonoBehaviour
         Attack,
         Hurt,
         Hi,
-        Leave
+        Leave,
+        Sad
     }
     
     public NState State;
@@ -88,6 +89,7 @@ public class NpcController : MonoBehaviour
         AddState(new HurtState());
         AddState(new AttackState());
         AddState(new HiState());
+        AddState(new SadState());
         AddState(new LeaveState());
         rb.velocity = Vector3.zero;
         SetState(NPCState.Walk);
@@ -112,17 +114,17 @@ public class NpcController : MonoBehaviour
             State.Run(this);         
         }
 
-        if ( PlayerController.Singleton.transform.position.x - transform.position.x > 10)
+        if ( PlayerController.Singleton.transform.position.x - transform.position.x > 10 || transform.position.x - PlayerController.Singleton.transform.position.x > 25 )
         {
             Destroy(gameObject);
         }      
-        if (State.State != NPCState.Leave && PlayerController.Singleton.transform.position.x > transform.position.x)
+        if (State.State != NPCState.Leave && State.State != NPCState.Sad && PlayerController.Singleton.transform.position.x > transform.position.x)
         {
             _renderer.flipX = false;
             _movement = 1;
             SetState(NPCState.Leave); 
         }
-        if (State.State != NPCState.Leave && PlayerController.Singleton.transform.position.x < transform.position.x)
+        if (State.State != NPCState.Leave && State.State != NPCState.Sad && PlayerController.Singleton.transform.position.x < transform.position.x)
         {
             _renderer.flipX = true;
             _movement = -1; 
@@ -169,9 +171,17 @@ public class NpcController : MonoBehaviour
                 return;
             }
 
-            if (State.State != NPCState.Angry && State.State != NPCState.Attack && PlayerController.Singleton.State.State != PlayerController.PlayerState.Dash)
+            if (State.State != NPCState.Leave && State.State != NPCState.Angry && State.State != NPCState.Attack && PlayerController.Singleton.State.State != PlayerController.PlayerState.Dash)
             {
-                SetState(NPCState.Angry);
+                if (Random.value > 0.5f)
+                {
+                    SetState(NPCState.Angry);
+                }
+                else
+                {
+                    SetState(NPCState.Sad);
+                }
+
                 return;
             }
             
@@ -330,6 +340,36 @@ public class NpcController : MonoBehaviour
             }
         }
     }
+    
+    
+    
+    public class SadState : NState
+    {
+        public float WaitTime;
+        public SadState()
+        {
+            State = NPCState.Sad;
+            TriggerName = "Sad";
+            WaitTime = Random.Range(1.0f, 4.0f);
+            
+        }
+
+        public override void Run(NpcController c)
+        {
+            WaitTime -= Time.deltaTime;
+            if (WaitTime < 0)
+            {
+                c._renderer.flipX = false;
+                Physics2D.IgnoreCollision(PlayerController.Singleton.GetComponent<Collider2D>(),
+                    c.GetComponent<Collider2D>());
+                c._animator.SetBool("Cry", true);
+                c.rb.velocity = new Vector2(
+                    Mathf.Lerp(Mathf.Abs(c.rb.velocity.x), c.WalkSpeed * 1.5f, Time.deltaTime * 4f),
+                    c.rb.velocity.y);
+            }
+        }
+    }
+    
     
     
     public class AngryState : NState
