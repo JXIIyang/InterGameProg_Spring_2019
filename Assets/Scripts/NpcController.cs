@@ -2,6 +2,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using System.Security.Cryptography.X509Certificates;
+using System.Timers;
 using UnityEngine;
 using Random = UnityEngine.Random;
 
@@ -60,6 +61,8 @@ public class NpcController : MonoBehaviour
 
 
     private bool _dashAudioPlayed;
+
+    private float timer = 4f;
     
     
     void Awake()
@@ -122,7 +125,12 @@ public class NpcController : MonoBehaviour
         {
             _renderer.flipX = false;
             _movement = 1;
-            SetState(NPCState.Leave); 
+            timer -= Time.deltaTime;
+             if(timer <= 0 ){
+                 SetState(NPCState.Leave, true);
+                 timer = 4f;
+             }
+            
         }
         if (State.State != NPCState.Leave && State.State != NPCState.Sad && PlayerController.Singleton.transform.position.x < transform.position.x)
         {
@@ -467,14 +475,14 @@ public class NpcController : MonoBehaviour
 
                 c.SetState(NPCState.Leave);
             }
-            else
+/*            else
             {
                 waitTimer -= Time.deltaTime;
                 if (waitTimer < 0)
                 {
                     c.SetState(NPCState.Leave);
                 }
-            }
+            }*/
             
 
         }

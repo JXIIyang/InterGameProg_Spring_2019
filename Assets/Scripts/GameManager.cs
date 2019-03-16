@@ -99,7 +99,7 @@ public class GameManager : MonoBehaviour
         
         
 
-        if (_alpha >= 1)
+        if (_alpha >= 0.99f)
         {
             SceneManager.LoadScene("End");
         }

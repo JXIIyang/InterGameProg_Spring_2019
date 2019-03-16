@@ -456,8 +456,6 @@ public class PlayerController : MonoBehaviour
                 c.SetState(PlayerState.Idle);
             }
         }
-
-
         public override void OnEnd(PlayerController c)
         {
             DashTimer = c.DashTime;  
